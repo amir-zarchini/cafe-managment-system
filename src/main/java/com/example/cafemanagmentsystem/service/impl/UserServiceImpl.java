@@ -1,6 +1,7 @@
 package com.example.cafemanagmentsystem.service.impl;
 
 import com.example.cafemanagmentsystem.constents.CafeConstants;
+import com.example.cafemanagmentsystem.exception.InvalidDataException;
 import com.example.cafemanagmentsystem.jwt.CustomerUserDetailsService;
 import com.example.cafemanagmentsystem.jwt.JwtFilter;
 import com.example.cafemanagmentsystem.jwt.JwtUtil;
@@ -13,6 +14,7 @@ import com.example.cafemanagmentsystem.wrapper.UserWrapper;
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -55,7 +57,8 @@ public class UserServiceImpl implements UserService {
 			}
 			else
 			{
-				return CafeUtils.getResponseEntity(CafeConstants.INVALID_DATA,HttpStatus.BAD_REQUEST);
+				throw new InvalidDataException(CafeConstants.INVALID_DATA);
+//				return CafeUtils.getResponseEntity(CafeConstants.INVALID_DATA,HttpStatus.BAD_REQUEST);
 			}
 		}
 		catch (Exception ex)
@@ -213,9 +216,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ResponseEntity<String> forgotPassword(Map<String, String> requestMap) 
+	public ResponseEntity<String> forgotPassword(Map<String, String> requestMap)
 	{
-		try 
+		try
 		{
 			User user = userRepository.findByEmail(requestMap.get("email"));
 			if(!Objects.isNull(user) && !Strings.isNullOrEmpty(user.getEmail()))
@@ -226,7 +229,7 @@ public class UserServiceImpl implements UserService {
 		}
 		catch (Exception ex)
 		{
-			ex.printStackTrace();		
+			ex.printStackTrace();
 		}
 		return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
