@@ -2,6 +2,7 @@ package com.example.cafemanagmentsystem.service.impl;
 
 import com.example.cafemanagmentsystem.constents.CafeConstants;
 import com.example.cafemanagmentsystem.exception.InvalidDataException;
+import com.example.cafemanagmentsystem.exception.SomethingWentWrongException;
 import com.example.cafemanagmentsystem.jwt.CustomerUserDetailsService;
 import com.example.cafemanagmentsystem.jwt.JwtFilter;
 import com.example.cafemanagmentsystem.jwt.JwtUtil;
@@ -40,32 +41,28 @@ public class UserServiceImpl implements UserService {
 	public ResponseEntity<String> signUp(Map<String, String> requestMap) 
 	{
 		log.info("Inside Signup {}",requestMap);
-		try
+
+		if(validateSignUpMap(requestMap))
 		{
-			if(validateSignUpMap(requestMap))
+			User user=userRepository.findByEmailId(requestMap.get("email"));
+			if(Objects.isNull(user))
 			{
-				User user=userRepository.findByEmailId(requestMap.get("email"));
-				if(Objects.isNull(user))
-				{
-					userRepository.save(getUserFromMap(requestMap));
-					return CafeUtils.getResponseEntity("Successfully Registered.", HttpStatus.OK);
-				}
-				else
-				{
-					return CafeUtils.getResponseEntity("Email already exist.",HttpStatus.BAD_REQUEST);
-				}
+				userRepository.save(getUserFromMap(requestMap));
+				return new ResponseEntity<> ("Successfully Registered.", HttpStatus.OK);
+//				CafeUtils.getResponseEntity("Successfully Registered.", HttpStatus.OK);
 			}
 			else
 			{
-				throw new InvalidDataException(CafeConstants.INVALID_DATA);
-//				return CafeUtils.getResponseEntity(CafeConstants.INVALID_DATA,HttpStatus.BAD_REQUEST);
+				throw new SomethingWentWrongException(CafeConstants.EMAIL_ALREADY_EXIST);
+//				return CafeUtils.getResponseEntity("Email already exist.",HttpStatus.BAD_REQUEST);
 			}
 		}
-		catch (Exception ex)
+		else
 		{
-			ex.printStackTrace();
+			throw new InvalidDataException(CafeConstants.INVALID_DATA);
+//			return CafeUtils.getResponseEntity(CafeConstants.INVALID_DATA,HttpStatus.BAD_REQUEST);
 		}
-		return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+
 	}
 	
 	//validating the request data
